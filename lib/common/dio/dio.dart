@@ -1,0 +1,106 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_study_2/common/const/data.dart';
+
+class CustomInterceptor extends Interceptor {
+  final FlutterSecureStorage storage;
+
+  CustomInterceptor({
+    required this.storage,
+  });
+
+  // 1) 요청을 보낼 때
+  @override
+  Future<void> onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
+    print('[REQ] [${options.method}] [${options.uri}]');
+    // Header에 accessToken이 있으면 토큰을 넣음
+    if (options.headers['accessToken'] == 'true') {
+      options.headers.remove('accessToken');
+
+      final token = await storage.read(key: ACCESS_TOKEN_KEY);
+
+      options.headers.addAll({
+        'authorization': 'Bearer $token',
+      });
+    }
+
+    // Header에 refreshToken이 있으면 토큰을 넣음
+    if (options.headers['refreshToken'] == 'true') {
+      options.headers.remove('refreshToken');
+
+      final token = await storage.read(key: REFRESH_TOKEN_KEY);
+
+      options.headers.addAll({
+        'authorization': 'Bearer $token',
+      });
+    }
+
+    return super.onRequest(options, handler);
+  }
+
+  // 2) 응답을 받을 때
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    print(
+        '[RES] [${response.requestOptions.method}] [${response.requestOptions.uri}]');
+    return super.onResponse(response, handler);
+  }
+
+  // 3) 에러가 났을 때
+  @override
+  Future<void> onError(
+      DioException err, ErrorInterceptorHandler handler) async {
+    print('[ERR] [${err.requestOptions.method}] [${err.requestOptions.uri}]');
+
+    // 401 Error (status code)
+    // accessToken reissuance 시도하고 issue되면 이를 이용하여 req
+    final refreshToken = await storage.read(key: REFRESH_TOKEN_KEY);
+
+    if (refreshToken == null) {
+      // refreshToken need to be inssue
+      // reject => error 그대로 / resolve => error 해결
+      return handler.reject(err);
+    }
+
+    final isStatus401 = err.response?.statusCode == 401;
+    final isPathRefresh = err.requestOptions.path == '/auth/token';
+
+    if (isStatus401 && !isPathRefresh) {
+      // 401 error and not refresh token request <=> access token expired
+      final dio = Dio();
+
+      try {
+        final resp = await dio.post(
+          'http://$ip/auth/token',
+          options: Options(
+            headers: {
+              'authorization': 'Bearer $refreshToken',
+            },
+          ),
+        );
+        final accessToken = resp.data['accessToken'];
+        final options = err.requestOptions;
+
+        // change access token in req header
+        options.headers.addAll(
+          {
+            'authorization': 'Bearer $accessToken',
+          },
+        );
+
+        await storage.write(key: ACCESS_TOKEN_KEY, value: accessToken);
+
+        // req re-request
+        final response = await dio.fetch(options);
+
+        return handler.resolve(response);
+      } on DioException catch (e) {
+        // cannot get refresh token
+        return handler.reject(e);
+      }
+    }
+
+    return handler.reject(err);
+  }
+}
