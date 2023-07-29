@@ -1,28 +1,26 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_study_2/common/dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_study_2/common/layout/default_layout.dart';
 import 'package:flutter_study_2/product/component/product_card.dart';
 import 'package:flutter_study_2/restaurant/component/restaurant_card.dart';
 
-import '../../common/const/data.dart';
 import '../model/restaurant_detail_model.dart';
 import '../repository/restaurant_repository.dart';
 
-class RestaurantDetailScreen extends StatelessWidget {
+class RestaurantDetailScreen extends ConsumerWidget {
   final String id;
   const RestaurantDetailScreen({
     super.key,
     required this.id,
   });
 
-  Future<RestaurantDetailModel> getRestaurantDetail() async {
-    final dio = Dio();
-    dio.interceptors.add(
-      CustomInterceptor(storage: storage),
-    );
-
-    //Future<Map<String, dynamic>>
+  Future<RestaurantDetailModel> getRestaurantDetail(WidgetRef ref) async {
+    //ver1
+    ////Future<Map<String, dynamic>>
+    //final dio = Dio();
+    //dio.interceptors.add(
+    //  CustomInterceptor(storage: storage),
+    //);
     //final accessToken = await storage.read(key: ACCESS_TOKEN_KEY);
     //final resp = await dio.get(
     //  'http://$ip/restaurant/$id',
@@ -33,18 +31,32 @@ class RestaurantDetailScreen extends StatelessWidget {
     //  ),
     //);
     //return resp.data;
-
-    final repository =
-        RestaurantRepository(dio, baseUrl: 'http://$ip/restaurant');
-    return repository.getRestaurantDetail(id: id);
+    //ver2
+    //final dio = ref.watch(dioProvider);
+    //final repository =
+    //    RestaurantRepository(dio, baseUrl: 'http://$ip/restaurant');
+    //return repository.getRestaurantDetail(id: id);
+    return ref
+        .watch(
+          restaurantRerefpositoryProvider,
+        )
+        .getRestaurantDetail(
+          id: id,
+        );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return DefaultLayout(
       title: '불타는 떡볶이',
       child: FutureBuilder<RestaurantDetailModel>(
-        future: getRestaurantDetail(),
+        future: ref
+            .watch(
+              restaurantRerefpositoryProvider,
+            )
+            .getRestaurantDetail(
+              id: id,
+            ),
         builder: (_, AsyncSnapshot<RestaurantDetailModel> snapshot) {
           if (snapshot.hasError) {
             return Center(
