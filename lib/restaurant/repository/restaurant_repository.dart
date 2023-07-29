@@ -10,7 +10,7 @@ import '../../common/dio/dio.dart';
 
 part 'restaurant_repository.g.dart';
 
-final restaurantRerefpositoryProvider = Provider<RestaurantRepository>(
+final restaurantRepositoryProvider = Provider<RestaurantRepository>(
   (ref) {
     final dio = ref.watch(dioProvider);
     final repository =

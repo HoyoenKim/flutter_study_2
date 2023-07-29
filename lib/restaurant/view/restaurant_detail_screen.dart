@@ -14,37 +14,6 @@ class RestaurantDetailScreen extends ConsumerWidget {
     required this.id,
   });
 
-  Future<RestaurantDetailModel> getRestaurantDetail(WidgetRef ref) async {
-    //ver1
-    ////Future<Map<String, dynamic>>
-    //final dio = Dio();
-    //dio.interceptors.add(
-    //  CustomInterceptor(storage: storage),
-    //);
-    //final accessToken = await storage.read(key: ACCESS_TOKEN_KEY);
-    //final resp = await dio.get(
-    //  'http://$ip/restaurant/$id',
-    //  options: Options(
-    //    headers: {
-    //      'authorization': 'Bearer $accessToken',
-    //    },
-    //  ),
-    //);
-    //return resp.data;
-    //ver2
-    //final dio = ref.watch(dioProvider);
-    //final repository =
-    //    RestaurantRepository(dio, baseUrl: 'http://$ip/restaurant');
-    //return repository.getRestaurantDetail(id: id);
-    return ref
-        .watch(
-          restaurantRerefpositoryProvider,
-        )
-        .getRestaurantDetail(
-          id: id,
-        );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultLayout(
@@ -52,7 +21,7 @@ class RestaurantDetailScreen extends ConsumerWidget {
       child: FutureBuilder<RestaurantDetailModel>(
         future: ref
             .watch(
-              restaurantRerefpositoryProvider,
+              restaurantRepositoryProvider,
             )
             .getRestaurantDetail(
               id: id,
@@ -70,7 +39,6 @@ class RestaurantDetailScreen extends ConsumerWidget {
               child: CircularProgressIndicator(),
             );
           }
-          //final item = RestaurantDetailModel.fromJson(snapshot.data!);
           return CustomScrollView(
             slivers: [
               renderTop(restaurantDetailModel: snapshot.data!),
