@@ -3,6 +3,7 @@ import 'package:flutter_study_2/common/const/colors.dart';
 import 'package:flutter_study_2/restaurant/model/restaurant_detail_model.dart';
 
 import '../../common/const/data.dart';
+import '../model/product_model.dart';
 
 class ProductCard extends StatelessWidget {
   final Image image;
@@ -18,7 +19,7 @@ class ProductCard extends StatelessWidget {
     super.key,
   });
 
-  factory ProductCard.fromModel({
+  factory ProductCard.fromRestaurantProductModel({
     required RestaurantProductModel model,
   }) {
     return ProductCard(
@@ -33,6 +34,24 @@ class ProductCard extends StatelessWidget {
       price: model.price,
     );
   }
+
+  //TODO oop로 해결해보기
+  factory ProductCard.fromProductModel({
+    required ProductModel model,
+  }) {
+    return ProductCard(
+      image: Image.network(
+        'http://$ip${model.imgUrl}',
+        width: 110,
+        height: 110,
+        fit: BoxFit.cover,
+      ),
+      name: model.name,
+      detail: model.detail,
+      price: model.price,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return IntrinsicHeight(
