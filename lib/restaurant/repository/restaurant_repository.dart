@@ -8,6 +8,7 @@ import 'package:retrofit/retrofit.dart';
 
 import '../../common/const/data.dart';
 import '../../common/dio/dio.dart';
+import '../../common/repository/base_pagination_repository.dart';
 
 part 'restaurant_repository.g.dart';
 
@@ -21,11 +22,13 @@ final restaurantRepositoryProvider = Provider<RestaurantRepository>(
 );
 
 @RestApi()
-abstract class RestaurantRepository {
+abstract class RestaurantRepository
+    implements IBasePaginationRepository<RestaurantModel> {
   factory RestaurantRepository(Dio dio, {String baseUrl}) =
       _RestaurantRepository;
 
   //http://$ip/restaurant
+  @override
   @GET('/')
   @Headers({
     'accessToken': 'true',

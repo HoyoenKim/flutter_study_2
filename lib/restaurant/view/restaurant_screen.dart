@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_study_2/common/model/cursor_pagination_model.dart';
+import 'package:flutter_study_2/common/utils/pagination_utils.dart';
+import 'package:flutter_study_2/restaurant/model/restaurant_model.dart';
 import 'package:flutter_study_2/restaurant/provider/restaurant_provider.dart';
 import 'package:flutter_study_2/restaurant/view/restaurant_detail_screen.dart';
 
@@ -23,12 +25,10 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
   }
 
   void scrollListener() {
-    // 현재 위치가 최대 길이보다 조금 덜되는 위치라면 새로운 데이터를 추가요청
-    if (controller.offset > controller.position.maxScrollExtent - 300) {
-      ref.read(restaurantProvider.notifier).paginate(
-            fetchMore: true,
-          );
-    }
+    PaginationUtils.paginate(
+      controller: controller,
+      provider: ref.read(restaurantProvider.notifier),
+    );
   }
 
   @override
@@ -52,7 +52,7 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
     // 1) CursorPagination: 정상적으로 데이터가 있는 상태
     // 4) CursorPagniationRefetching: 첫번째 페이지부터 다시 데이터를 가져올 때
     // 5) CursorPagniationFetchMore: 추가 데이털르 pagniate 요청을 받았을 떄
-    final cp = data as CursorPagination;
+    final cp = data as CursorPagination<RestaurantModel>;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
