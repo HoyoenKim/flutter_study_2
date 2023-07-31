@@ -4,7 +4,10 @@ import 'package:flutter_study_2/common/layout/default_layout.dart';
 import 'package:flutter_study_2/product/component/view/product_screen.dart';
 import 'package:flutter_study_2/restaurant/view/restaurant_screen.dart';
 
+import '../../user/view/profile_screen.dart';
+
 class RootTab extends StatefulWidget {
+  static String get routeName => 'root';
   const RootTab({super.key});
 
   @override
@@ -79,11 +82,7 @@ class _RootTabState extends State<RootTab> with SingleTickerProviderStateMixin {
               child: const Text('주문'),
             ),
           ),
-          Center(
-            child: Container(
-              child: const Text('프로필'),
-            ),
-          ),
+          const ProfileScreen(),
         ],
       ),
     );

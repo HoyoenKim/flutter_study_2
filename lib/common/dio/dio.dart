@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_study_2/common/const/data.dart';
 import 'package:flutter_study_2/common/secure_storage/secure_storage.dart';
+import 'package:flutter_study_2/user/provider/auth_provider.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio();
@@ -10,7 +11,7 @@ final dioProvider = Provider<Dio>((ref) {
   final storage = ref.watch(secureStorageProvider);
 
   dio.interceptors.add(
-    CustomInterceptor(storage: storage),
+    CustomInterceptor(storage: storage, ref: ref),
   );
 
   return dio;
@@ -18,9 +19,11 @@ final dioProvider = Provider<Dio>((ref) {
 
 class CustomInterceptor extends Interceptor {
   final FlutterSecureStorage storage;
+  final Ref ref;
 
   CustomInterceptor({
     required this.storage,
+    required this.ref,
   });
 
   // 1) 요청을 보낼 때
@@ -110,7 +113,16 @@ class CustomInterceptor extends Interceptor {
 
         return handler.resolve(response);
       } on DioException catch (e) {
-        // cannot get refresh token
+        // refresh token expired
+
+        // circular dependency error (A -> B / B -> A => A -> B -> A -> B ...)
+        // ref.read(userMeProvider.notifier).logout();
+
+        // dio는 userMeProvider에서 DI 되므로
+        // dio에서 userMeProvider를 DI 할 수 없다. (빌드 타임에 알고 있어야 하므로.)
+        // 직접 DI를 하지 않는 객체를 만들어서 해결한다. (authProvider)
+        ref.read(authProvider.notifier).logout();
+
         return handler.reject(e);
       }
     }
