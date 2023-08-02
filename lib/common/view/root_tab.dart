@@ -4,6 +4,7 @@ import 'package:flutter_study_2/common/layout/default_layout.dart';
 import 'package:flutter_study_2/product/view/product_screen.dart';
 import 'package:flutter_study_2/restaurant/view/restaurant_screen.dart';
 
+import '../../order/view/order_screen.dart';
 import '../../user/view/profile_screen.dart';
 
 class RootTab extends StatefulWidget {
@@ -74,15 +75,11 @@ class _RootTabState extends State<RootTab> with SingleTickerProviderStateMixin {
       child: TabBarView(
         physics: const NeverScrollableScrollPhysics(),
         controller: controller,
-        children: [
-          const RestaurantScreen(),
-          const ProductScreen(),
-          Center(
-            child: Container(
-              child: const Text('주문'),
-            ),
-          ),
-          const ProfileScreen(),
+        children: const [
+          RestaurantScreen(),
+          ProductScreen(),
+          OrderScreen(),
+          ProfileScreen(),
         ],
       ),
     );

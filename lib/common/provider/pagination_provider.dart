@@ -1,3 +1,4 @@
+import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_study_2/common/model/cursor_pagination_model.dart';
 import 'package:flutter_study_2/common/model/model_with_id.dart';
@@ -5,14 +6,39 @@ import 'package:flutter_study_2/common/model/model_with_id.dart';
 import '../model/pagination_params.dart';
 import '../repository/base_pagination_repository.dart';
 
+class _PaginationInfo {
+  final int fetchCount;
+  final bool fetchMore;
+  final bool forceRefetch;
+
+  const _PaginationInfo({
+    // ignore: unused_element
+    this.fetchCount = 20,
+    // ignore: unused_element
+    this.fetchMore = false,
+    // ignore: unused_element
+    this.forceRefetch = false,
+  });
+}
+
 class PaginationProvider<T extends IModelWithId,
         U extends IBasePaginationRepository<T>>
     extends StateNotifier<CursorPaginationBase> {
   final U repository;
+  final paginationThrottle = Throttle(
+    const Duration(seconds: 3),
+    initialValue: const _PaginationInfo(),
+    checkEquality: false,
+  );
   PaginationProvider({
     required this.repository,
   }) : super(CursorPagniationLoading()) {
     paginate();
+    paginationThrottle.values.listen(
+      (state) {
+        _throttledPagination(state);
+      },
+    );
   }
 
   Future<void> paginate({
@@ -24,6 +50,14 @@ class PaginationProvider<T extends IModelWithId,
     // true: cursorPaginationLoading()
     bool forceRefetch = false,
   }) async {
+    paginationThrottle.setValue(_PaginationInfo(
+      fetchCount: fetchCount,
+      fetchMore: fetchMore,
+      forceRefetch: forceRefetch,
+    ));
+  }
+
+  _throttledPagination(_PaginationInfo info) async {
     //final resp = await repository.paginate();
     //state = resp;
     // 5가지 가능성: State의 상태
@@ -32,6 +66,9 @@ class PaginationProvider<T extends IModelWithId,
     // 3) CursorPagniationError: 에러가 있는 상태
     // 4) CursorPagniationRefetching: 첫번째 페이지부터 다시 데이터를 가져올 때
     // 5) CursorPagniationFetchMore: 추가 데이털르 pagniate 요청을 받았을 떄
+    final fetchCount = info.fetchCount;
+    final fetchMore = info.fetchMore;
+    final forceRefetch = info.forceRefetch;
 
     try {
       // 바로 반환

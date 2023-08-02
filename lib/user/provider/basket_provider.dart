@@ -1,3 +1,4 @@
+import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_study_2/product/model/product_model.dart';
 import 'package:collection/collection.dart';
@@ -16,9 +17,22 @@ final basketProvider =
 
 class BasketProvider extends StateNotifier<List<BasketItemModel>> {
   final UserMeRepository repository;
+  final updateBasektDebounce = Debouncer(
+    const Duration(
+      seconds: 1,
+    ),
+    initialValue: null,
+    checkEquality: false,
+  );
   BasketProvider({
     required this.repository,
-  }) : super([]);
+  }) : super([]) {
+    updateBasektDebounce.values.listen(
+      (event) {
+        patchBasket();
+      },
+    );
+  }
 
   Future<void> patchBasket() async {
     await repository.patchBasket(
@@ -62,7 +76,7 @@ class BasketProvider extends StateNotifier<List<BasketItemModel>> {
     // 이는 앱이 느리게 보이게됨.
     // Optimisitic Response (긍정적 응답)
     // 응답이 성공할 것이라 가정하고 상태를 먼저 업데이트
-    await patchBasket();
+    updateBasektDebounce.setValue(null);
   }
 
   Future<void> removeFromBasket({
@@ -93,6 +107,6 @@ class BasketProvider extends StateNotifier<List<BasketItemModel>> {
               : e)
           .toList();
     }
-    await patchBasket();
+    updateBasektDebounce.setValue(null);
   }
 }
