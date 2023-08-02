@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_study_2/common/const/colors.dart';
 import 'package:flutter_study_2/common/layout/default_layout.dart';
-import 'package:flutter_study_2/product/component/view/product_screen.dart';
+import 'package:flutter_study_2/product/view/product_screen.dart';
 import 'package:flutter_study_2/restaurant/view/restaurant_screen.dart';
 
 import '../../user/view/profile_screen.dart';

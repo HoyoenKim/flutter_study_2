@@ -22,4 +22,8 @@ class DataUtils {
     String encoded = stringToBase64.encode(plain);
     return encoded;
   }
+
+  static DateTime stringToDateTime(String value) {
+    return DateTime.parse(value);
+  }
 }

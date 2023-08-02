@@ -5,14 +5,15 @@ class DefaultLayout extends StatelessWidget {
   final Widget child;
   final String? title;
   final Widget? bottomNavigationBar;
+  final Widget? floactingActionButton;
 
-  const DefaultLayout({
-    super.key,
-    required this.child,
-    this.backgroudnColor,
-    this.title,
-    this.bottomNavigationBar,
-  });
+  const DefaultLayout(
+      {super.key,
+      required this.child,
+      this.backgroudnColor,
+      this.title,
+      this.bottomNavigationBar,
+      this.floactingActionButton});
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +22,7 @@ class DefaultLayout extends StatelessWidget {
       appBar: renderAppBar(),
       body: child,
       bottomNavigationBar: bottomNavigationBar,
+      floatingActionButton: floactingActionButton,
     );
   }
 

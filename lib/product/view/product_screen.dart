@@ -4,8 +4,8 @@ import 'package:flutter_study_2/product/provider/product_provider.dart';
 import 'package:flutter_study_2/restaurant/view/restaurant_detail_screen.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../model/product_model.dart';
-import '../product_card.dart';
+import '../model/product_model.dart';
+import '../component/product_card.dart';
 
 class ProductScreen extends StatelessWidget {
   const ProductScreen({super.key});
